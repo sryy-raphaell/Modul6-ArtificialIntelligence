@@ -1,0 +1,89 @@
+<!--
+File: templates/index.html
+Deskripsi Studi Kasus:
+    Sistem Informasi Perpustakaan - Prediksi Kemungkinan Keterlambatan Pengembalian Buku.
+    Antarmuka web bagi pustakawan/operator untuk mengecek potensi keterlambatan anggota
+    sebelum transaksi peminjaman disetujui.
+Komponen Terkait:
+    - Application Layer (HTML + JavaScript Fetch API): Mengumpulkan input pengguna,
+      mengirimkan HTTP POST request berformat JSON ke endpoint '/predict' pada API Layer,
+      dan menampilkan hasil prediksi beserta probabilitasnya.
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Keterlambatan Buku - Perpustakaan</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 40px auto; line-height: 1.6; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; }
+        input, select, button { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background: #111; color: #fff; border: none; cursor: pointer; font-weight: bold; margin-top: 8px; }
+        button:hover { background: #333; }
+        #hasil { margin-top: 20px; padding: 12px; border: 1px solid #ccc; display: none; }
+    </style>
+</head>
+<body>
+    <h2>Prediksi Keterlambatan Pengembalian Buku</h2>
+    <p>Masukkan data riwayat peminjaman anggota untuk memprediksi risiko keterlambatan.</p>
+
+    <div class="form-group">
+        <label for="jumlah_buku">Jumlah Buku Dipinjam:</label>
+        <input type="number" id="jumlah_buku" min="1" placeholder="Contoh: 3" required>
+    </div>
+
+    <div class="form-group">
+        <label for="rata_lama_pinjam">Lama Rata-Rata Peminjaman Sebelumnya (Hari):</label>
+        <input type="number" id="rata_lama_pinjam" step="0.1" min="0" placeholder="Contoh: 6.5" required>
+    </div>
+
+    <div class="form-group">
+        <label for="jenis_anggota">Jenis Anggota:</label>
+        <select id="jenis_anggota">
+            <option value="0">0 - Mahasiswa</option>
+            <option value="1">1 - Dosen / Staf</option>
+            <option value="2">2 - Anggota Umum</option>
+        </select>
+    </div>
+
+    <button onclick="cekPrediksi()">Prediksi Risiko</button>
+
+    <div id="hasil"></div>
+
+    <script>
+        async function cekPrediksi() {
+            const hasilDiv = document.getElementById("hasil");
+            const payload = {
+                jumlah_buku: parseInt(document.getElementById("jumlah_buku").value),
+                rata_lama_pinjam: parseFloat(document.getElementById("rata_lama_pinjam").value),
+                jenis_anggota: parseInt(document.getElementById("jenis_anggota").value)
+            };
+
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                hasilDiv.style.display = "block";
+
+                if (response.ok) {
+                    hasilDiv.innerHTML = `
+                        <strong>Status Prediksi:</strong> ${data.label}<br>
+                        <strong>Tingkat Keyakinan (Probabilitas):</strong> ${(data.probabilitas * 100).toFixed(1)}%
+                    `;
+                } else {
+                    hasilDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                }
+            } catch (err) {
+                hasilDiv.style.display = "block";
+                hasilDiv.innerHTML = `<strong>Gagal terhubung ke API:</strong> ${err.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
