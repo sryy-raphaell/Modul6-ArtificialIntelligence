@@ -1,6 +1,6 @@
 # Modul 6: Integrasi Teknik AI dalam Sistem Informasi
 
-Repositori ini berisi implementasi praktikum dan tugas mandiri mata kuliah **Artificial Intelligence** terkait integrasi model _Artificial Neural Network_ (ANN) ke dalam sistem informasi fungsional menggunakan arsitektur layanan (_Model as a Service_).
+Repositori ini berisi implementasi praktikum, materi presentasi, dan tugas mandiri mata kuliah **Artificial Intelligence** terkait integrasi model _Artificial Neural Network_ (ANN) ke dalam sistem informasi fungsional menggunakan arsitektur layanan (_Model as a Service_).
 
 ---
 
@@ -18,9 +18,9 @@ Pada modul ini, fokus pembelajaran bergeser dari sekadar melatih model _machine 
 
 ---
 
-## Arsitektur & Struktur Proyek
+## Arsitektur & Struktur Direktori
 
-Sistem dibangun menggunakan pendekatan arsitektur berlapis (_Layered Architecture_):
+Setiap studi kasus dibangun menggunakan pendekatan arsitektur berlapis (_Layered Architecture_):
 
 - **Application Layer (`templates/index.html`):** Antarmuka web berbasis HTML/JavaScript untuk mengirim input dan menampilkan hasil prediksi.
 - **API Layer (`app.py`):** Endpoint REST (`/predict`) berbasis Flask yang memvalidasi payload JSON dan mengembalikan respons prediksi.
@@ -28,54 +28,88 @@ Sistem dibangun menggunakan pendekatan arsitektur berlapis (_Layered Architectur
 - **Data Layer (`*.db`):** Basis data SQLite3 untuk menyimpan log transaksi prediksi dan audit statistik.
 
 ```text
-├── README.md                 # Dokumentasi repositori & panduan GitHub
-├── materi_dan_presentasi.md  # Rangkuman materi & naskah presentasi (PPT)
-├── train_model.py            # Skrip pelatihan & serialisasi model (Fase Training)
-├── app.py                    # Server Flask REST API & logging SQLite (Fase Serving)
-├── test_api.py               # Skrip pengujian end-to-end otomatis
-└── templates/
-    └── index.html            # Antarmuka pengguna (Web UI)
+Modul6-ArtificialIntelligence/
+├── .gitignore
+├── README.md
+├── Materi/
+│   └── MATERI.md                                     # Rangkuman teori, naskah PPT & pembahasan latihan
+├── Laporan/                                          # Versi Jupyter Notebook (All-in-One per kasus)
+│   ├── Kasus1/
+│   │   └── Studi_Kasus_1_Perpustakaan.ipynb
+│   ├── Kasus2/
+│   │   └── Studi_Kasus_2_Kesehatan_Kampus.ipynb
+│   └── Kasus3/
+│       └── Studi_Kasus_3_PMB.ipynb
+└── Studi Kasus/                                      # Versi Modular Python Scripts
+    ├── prediksi_perpustakaan/                        # Studi Kasus 1: Risiko Keterlambatan Buku
+    │   ├── train_model.py
+    │   ├── app.py
+    │   ├── test_api.py
+    │   └── templates/index.html
+    ├── prediksi_kesehatan_kampus/                    # Studi Kasus 2: Klasifikasi Risiko Stres Mahasiswa
+    │   ├── train_model.py
+    │   ├── app.py
+    │   ├── test_api.py
+    │   └── templates/index.html
+    └── prediksi_pmb/                                 # Studi Kasus 3: Prediksi Kelulusan Seleksi PMB
+        ├── train_model.py
+        ├── app.py
+        ├── test_api.py
+        └── templates/index.html
 ```
 
 ---
 
 ## Prasyarat & Cara Menjalankan Proyek
 
-1. **Clone repositori ini:**
+### 1. Clone Repositori & Instalasi Pustaka
 
+```bash
+git clone https://github.com/sryy-raphaell/Modul6-ArtificialIntelligence.git
+cd Modul6-ArtificialIntelligence
+pip install scikit-learn joblib flask requests numpy
+```
+
+---
+
+### 2. Opsi A — Menjalankan Versi Modular Python (`Studi Kasus/`)
+
+Pilih salah satu folder studi kasus (misalnya `prediksi_perpustakaan`, `prediksi_kesehatan_kampus`, atau `prediksi_pmb`):
+
+1. **Masuk ke direktori studi kasus:**
    ```bash
-   git clone https://github.com/sryy-raphaell/Modul6-ArtificialIntelligence.git
-   cd "Modul 6"
+   cd "Studi Kasus/prediksi_perpustakaan"
    ```
-
-2. **Instalasi pustaka (_dependencies_) Python:**
-   Pastikan Python 3.8+ sudah terpasang, lalu jalankan:
-
-   ```bash
-   pip install scikit-learn joblib flask requests numpy
-   ```
-
-3. **Langkah 1 — Melatih & Menyimpan Model (Fase Training):**
-
+2. **Langkah 1 — Melatih & Menyimpan Model (Fase Training):**
    ```bash
    python train_model.py
    ```
-
-   _Perintah ini akan menghasilkan file model terlatih berekstensi `.joblib`._
-
-4. **Langkah 2 — Menjalankan Server API (Fase Serving):**
-
+   _Menghasilkan file model terlatih (`_.joblib`) secara otomatis.\*
+3. **Langkah 2 — Menjalankan Server API (Fase Serving):**
    ```bash
    python app.py
    ```
-
-   _Server berjalan di `http://localhost:5000`. Buka alamat tersebut di browser untuk mengakses antarmuka web._
-
-5. **Langkah 3 — Pengujian End-to-End:**
-   Buka terminal baru (selagi `app.py` tetap berjalan), lalu jalankan:
+   _Server aktif pada `http://localhost:5000`. Buka alamat tersebut di browser untuk mencoba antarmuka web._
+4. **Langkah 3 — Pengujian End-to-End:**
+   Buka terminal baru pada direktori kasus yang sama (selagi `app.py` berjalan), lalu jalankan:
    ```bash
    python test_api.py
    ```
+
+---
+
+### 3. Opsi B — Menjalankan Versi Jupyter Notebook (`Laporan/`)
+
+Setiap notebook di dalam folder `Laporan/Kasus1/`, `Laporan/Kasus2/`, dan `Laporan/Kasus3/` sudah mencakup keseluruhan alur (_training_, pembuatan `templates/index.html`, server Flask, hingga pengujian _end-to-end_):
+
+1. Buka file `.ipynb` melalui VS Code atau Jupyter Notebook.
+2. Klik **Run All** untuk mengeksekusi seluruh sel secara berurutan.
+3. Masing-masing notebook berjalan di _background thread_ dengan port berbeda agar tidak bentrok:
+   - **Kasus 1 (Perpustakaan):** Port `5001`
+   - **Kasus 2 (Kesehatan Kampus):** Port `5002`
+   - **Kasus 3 (Seleksi PMB):** Port `5003`
+
+> **Catatan Artefak Otomatis:** File model (`*.joblib`) dan database lokal (`*.db`) diabaikan oleh `.gitignore` dan akan terbentuk otomatis saat skrip pelatihan atau notebook dijalankan.
 
 ---
 
@@ -85,32 +119,30 @@ Sistem dibangun menggunakan pendekatan arsitektur berlapis (_Layered Architectur
 
 Agar tidak terjadi konflik kode (_merge conflict_) saat bekerja secara berkelompok, ikuti alur kerja berikut:
 
-1. **Mengambil pembaruan terbaru sebelum mulai bekerja:**
+1. **Ambil pembaruan terbaru sebelum mulai bekerja:**
    ```bash
    git checkout main
    git pull origin main
    ```
-2. **Membuat _branch_ baru sesuai bagian tugas masing-masing:**
+2. **Buat _branch_ baru sesuai bagian tugas masing-masing:**
    ```bash
-   # Contoh: fitur-model, fitur-api, fitur-ui, atau dokumentasi
+   # Contoh: fitur-kasus1, fitur-kasus2, update-materi, dll.
    git checkout -b fitur-nama-tugas
    ```
-3. **Menyimpan perubahan secara berkala (_Commit_):**
+3. **Simpan perubahan secara berkala (_Commit_):**
    ```bash
    git status
    git add .
-   git commit -m "feat: menambahkan validasi input pada endpoint predict"
+   git commit -m "feat: menambahkan pengujian end-to-end pada studi kasus"
    ```
-4. **Mengunggah _branch_ ke GitHub (_Push_):**
+4. **Unggah _branch_ ke GitHub (_Push_):**
    ```bash
    git push origin fitur-nama-tugas
    ```
-5. **Mengajukan _Pull Request_ (PR):**
-   - Buka halaman repositori di GitHub.
+5. **Ajukan _Pull Request_ (PR):**
+   - Buka halaman repositori di GitHub: [Modul6-ArtificialIntelligence](https://github.com/sryy-raphaell/Modul6-ArtificialIntelligence)
    - Klik tombol **Compare & pull request**.
-   - Tuliskan deskripsi perubahan yang dilakukan, lalu minta rekan tim untuk melakukan _review_ sebelum menekan tombol **Merge pull request** ke `main`.
-
-> **Catatan Penting (`.gitignore`):** File hasil generate otomatis seperti `__pycache__/`, lingkungan virtual (`venv/`), serta file database lokal sementara (`*.db`) sebaiknya tidak ditimpa secara sembarangan antar anggota tim.
+   - Tuliskan ringkasan perubahan yang dikerjakan, lalu lakukan _review_ bersama anggota tim sebelum menekan tombol **Merge pull request** ke `main`.
 
 ---
 
@@ -118,13 +150,14 @@ Agar tidak terjadi konflik kode (_merge conflict_) saat bekerja secara berkelomp
 
 Untuk meninjau kode sumber, riwayat kontribusi anggota tim, serta menguji aplikasi:
 
-1. **Mengunduh Proyek Mahasiswa:**
-   - Klik tombol hijau **`<> Code`** di bagian atas repositori, lalu pilih **Download ZIP**, atau gunakan perintah:
+1. **Mengunduh Proyek:**
+   - Klik tombol hijau **`<> Code`** pada halaman repositori, lalu pilih **Download ZIP**, atau jalankan perintah:
      ```bash
-     git clone <url-repositori-ini>
+     git clone https://github.com/sryy-raphaell/Modul6-ArtificialIntelligence.git
      ```
 2. **Memeriksa Kontribusi Tiap Anggota Tim:**
-   - Buka tab **Insights** $\rightarrow$ **Contributors** pada halaman GitHub untuk melihat statistik kontribusi setiap anggota.
-   - Buka menu **Commits** atau **Pull requests** (filter: _Closed_) untuk melihat pembagian tugas dan riwayat pengerjaan secara kronologis.
-3. **Menjalankan & Menguji Aplikasi:**
-   - Ikuti langkah pada bagian **Cara Menjalankan Proyek** di atas (`train_model.py` $\rightarrow$ `app.py` $\rightarrow$ `test_api.py`) atau periksa hasil pengujian pada file laporan PDF yang disertakan.
+   - Buka tab **Insights** $\rightarrow$ **Contributors** pada GitHub untuk melihat grafik dan statistik kontribusi setiap anggota.
+   - Buka tab **Commits** atau **Pull requests** (filter: _Closed_) untuk melihat pembagian kerja dan riwayat pengerjaan secara kronologis.
+3. **Membaca Materi & Menjalankan Pengujian:**
+   - Rangkuman materi dan jawaban latihan mandiri tersedia di `Materi/MATERI.md`.
+   - Pengujian aplikasi dapat dilakukan melalui **Opsi A** (`Studi Kasus/`) maupun **Opsi B** (`Laporan/`).

@@ -1,0 +1,38 @@
+# 1. Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 2. Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# 3. File Database Lokal (Hasil Logging SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# 4. File Model Terlatih (Artefak Serialisasi)
+*.joblib
+*.pkl
+
+# 5. Environment Variables & Konfigurasi Rahasia
+.env
+.env.local
+
+# 6. Cache Jupyter Notebook & Testing
+.ipynb_checkpoints/
+.pytest_cache/
+
+# 7. Konfigurasi IDE / Code Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 8. File Sistem Operasi
+.DS_Store
+Thumbs.db

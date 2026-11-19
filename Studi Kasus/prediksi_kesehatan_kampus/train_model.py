@@ -1,14 +1,13 @@
 """
 File: train_model.py
 Deskripsi Studi Kasus:
-    Sistem Informasi Perpustakaan - Prediksi Kemungkinan Keterlambatan Pengembalian Buku.
-    Memprediksi apakah anggota perpustakaan berisiko terlambat mengembalikan buku (1)
-    atau tepat waktu (0) berdasarkan riwayat peminjaman.
+    Sistem Informasi Kesehatan Kampus - Klasifikasi Tingkat Risiko Stres Mahasiswa.
+    Mengklasifikasikan kondisi risiko stres mahasiswa ke dalam 3 kelas
+    (0 = Rendah, 1 = Sedang, 2 = Tinggi) berdasarkan data kuesioner harian.
 Komponen Terkait:
-    - Model Layer (Fase Training): Menggunakan scikit-learn (MLPClassifier) untuk melatih
-      model Artificial Neural Network dan joblib untuk serialisasi model ke file .joblib.
-    - Fitur Input: [jumlah_buku, rata_lama_pinjam, jenis_anggota]
-      (jenis_anggota: 0 = Mahasiswa, 1 = Dosen/Staf, 2 = Umum)
+    - Model Layer (Fase Training): Menggunakan scikit-learn (MLPClassifier) untuk
+      klasifikasi multi-kelas dan joblib untuk serialisasi model ke file .joblib.
+    - Fitur Input: [jam_tidur, beban_sks, jam_kerja_paruh_waktu]
 """
 
 import numpy as np
@@ -18,40 +17,38 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 import joblib
 
-# Dataset historis peminjaman perpustakaan
-# Fitur: [jumlah_buku_dipinjam, lama_rata_rata_peminjaman_hari, jenis_anggota]
-# jenis_anggota: 0 = Mahasiswa, 1 = Dosen/Staf, 2 = Umum
+# Dataset historis hasil kuesioner kesehatan mahasiswa
+# Fitur: [jam_tidur_per_hari, beban_sks_semester, jam_kerja_paruh_waktu_per_minggu]
 X = np.array(
     [
-        [1, 3.0, 0],  # Pinjam sedikit, cepat kembali, mahasiswa -> Tepat waktu
-        [2, 4.5, 1],  # Dosen, kembali cepat -> Tepat waktu
-        [5, 12.0, 0],  # Pinjam banyak, rata-rata lama -> Terlambat
-        [4, 14.5, 2],  # Umum, pinjam banyak & lama -> Terlambat
-        [1, 5.0, 1],  # Dosen, pinjam 1 buku -> Tepat waktu
-        [6, 15.0, 0],  # Mahasiswa, beban bacaan tinggi & lama -> Terlambat
-        [2, 6.0, 2],  # Umum, cepat kembali -> Tepat waktu
-        [5, 11.5, 2],  # Umum, pinjam banyak & lama -> Terlambat
-        [3, 5.5, 0],  # Mahasiswa, sedang & tepat waktu -> Tepat waktu
-        [4, 13.0, 1],  # Dosen, pinjam banyak & sangat lama -> Terlambat
-        [2, 3.5, 0],  # Mahasiswa, cepat kembali -> Tepat waktu
-        [6, 16.0, 2],  # Umum, sangat berisiko terlambat -> Terlambat
+        [8.0, 18, 0],  # Tidur cukup, SKS normal, tidak kerja -> Risiko Rendah (0)
+        [7.5, 20, 4],  # Tidur cukup, SKS normal, kerja ringan -> Risiko Rendah (0)
+        [8.5, 16, 0],  # Istirahat sangat baik -> Risiko Rendah (0)
+        [7.0, 19, 5],  # Pola seimbang -> Risiko Rendah (0)
+        [6.0, 22, 10,],  # Tidur agak kurang, SKS padat, kerja paruh waktu -> Risiko Sedang (1)
+        [5.5, 20, 12],  # Tidur kurang, beban kerja sedang -> Risiko Sedang (1)
+        [6.5, 24, 8],  # SKS maksimal, tidur cukup -> Risiko Sedang (1)
+        [6.0, 21, 14],  # Tekanan waktu mulai tinggi -> Risiko Sedang (1)
+        [4.0, 24, 20,],  # Kurang tidur parah, SKS penuh, kerja berat -> Risiko Tinggi (2)
+        [4.5, 22, 25],  # Kelelahan fisik & akademik -> Risiko Tinggi (2)
+        [3.5, 24, 18],  # Defisit tidur ekstrem -> Risiko Tinggi (2)
+        [5.0, 23, 22],  # Beban ganda berat -> Risiko Tinggi (2)
     ]
 )
 
-# Label Target: 0 = Tepat Waktu, 1 = Berisiko Terlambat
-y = np.array([0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+# Label Target: 0 = Risiko Rendah, 1 = Risiko Sedang, 2 = Risiko Tinggi
+y = np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
 
-# Membagi data latih dan data uji (75% latih, 25% uji)
+# Membagi data latih dan data uji (75% latih, 25% uji) dengan stratifikasi kelas
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
+    X, y, test_size=0.25, random_state=42, stratify=y
 )
 
-# Menggunakan Pipeline (StandardScaler + MLPClassifier) agar skala fitur seragam
-# dan bobot ANN cepat konvergen
+# Menggunakan Pipeline (StandardScaler + MLPClassifier)
 model = make_pipeline(
     StandardScaler(),
     MLPClassifier(
-        hidden_layer_sizes=(8, 4), activation="relu", max_iter=2000, random_state=42
+        hidden_layer_sizes=(10, 6), activation="relu", max_iter=2500, random_state=42
     ),
 )
 
@@ -63,6 +60,6 @@ akurasi = model.score(X_test, y_test)
 print(f"Akurasi model pada data uji: {akurasi:.2f}")
 
 # Serialisasi model ke file fisik untuk digunakan oleh API Layer
-nama_file_model = "model_keterlambatan.joblib"
+nama_file_model = "model_stres.joblib"
 joblib.dump(model, nama_file_model)
 print(f"Model berhasil disimpan sebagai '{nama_file_model}'")
